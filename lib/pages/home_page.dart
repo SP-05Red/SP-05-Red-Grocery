@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
 
+  // Current User Object retrieved from the authentication provider
   final User? user = Auth().currentUser;
 
+  // Asynchronous method to sign out the current user
   Future<void> signOut() async {
     await Auth().signOut();
   }
@@ -15,6 +17,7 @@ class HomePage extends StatelessWidget {
     return const Text('GrocAgree');
   }
 
+  // Widget representing the user's personal lists
   Widget _myLists() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,6 +46,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  // Widget representing the shared lists of the user
   Widget _sharedLists() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,6 +75,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  // Build method for the home page and its UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
