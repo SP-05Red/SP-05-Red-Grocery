@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth.dart';
 
+// Stateful widget for the login page
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -9,13 +10,18 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+// State class for the login page
 class _LoginPageState extends State<LoginPage> {
   String? errorMessage = '';
+
+  // Flag indicating whether the user is trying to log in or register
   bool isLogin = true;
 
+  // Controllers for email and password text fields
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
+  // Asynchronous method to sign in with email and password
   Future<void> signInWithEmailAndPassword() async {
     try {
       await Auth().signInWithEmailAndPassword(
@@ -29,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Asynchronous method to create a new user with email and password
   Future<void> createUserWithEmailAndPassword() async {
     try {
       await Auth().createUserWithEmailAndPassword(
@@ -42,10 +49,12 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Widget displaying the title of the application
   Widget _title() {
     return const Text('GrocAgree');
   }
 
+  // Widget for creating an entry field with a title and controller
   Widget _entryField(
     String title,
     TextEditingController controller,
@@ -58,10 +67,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // Widget for displaying error messages
   Widget _errorMessage() {
     return Text(errorMessage == '' ? '' : 'Humm ? $errorMessage');
   }
 
+  // Widget for creating the submit button (Login or Register)
   Widget _submitButton() {
     return ElevatedButton(
       onPressed:
@@ -70,6 +81,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // Widget for switching between Login and Register modes
   Widget _loginOrRegisterButton() {
     return TextButton(
       onPressed: () {
@@ -81,6 +93,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // Build method for the login page
   @override
   Widget build(BuildContext context) {
     return Scaffold(
