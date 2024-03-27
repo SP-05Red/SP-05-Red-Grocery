@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       // The theme for the entire application
       theme: ThemeData(
-        primaryColor: Colors.amber,
+        primaryColor: const Color.fromARGB(255, 177, 162, 117),
       ),
       // Sets WidgetTree as the home page
       home: const WidgetTree(),
