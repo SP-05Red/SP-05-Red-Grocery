@@ -56,7 +56,7 @@ class AddEditListPage extends StatelessWidget {
               onPressed: () {
                 _showAdditionalButtonsDialog(context);
               },
-              child: Text('Additional Options'),
+              child: Text('Share List'),
             ),
           ],
         ),
@@ -72,7 +72,7 @@ class AddEditListPage extends StatelessWidget {
           title: Text('Additional Options'),
           content: TextField(
             controller: _sharedIdController,
-            decoration: InputDecoration(labelText: 'Enter Shared ID'),
+            decoration: InputDecoration(labelText: 'Enter User Email'),
           ),
           actions: <Widget>[
             TextButton(
@@ -85,7 +85,7 @@ class AddEditListPage extends StatelessWidget {
               onPressed: () {
                 _saveSharedIdToFirestore(context);
               },
-              child: Text('Plus'),
+              child: Text('Add'),
             ),
           ],
         );
