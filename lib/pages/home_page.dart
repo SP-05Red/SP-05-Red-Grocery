@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:grocery_app/auth.dart';
+import 'package:grocery_app/pages/add_edit_list.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -30,17 +32,46 @@ class HomePage extends StatelessWidget {
           ),
         ),
         SizedBox(height: 10),
-        Container(
-          height: 150, // Adjust the height as needed
-          child: ListView.builder(
-            itemCount: 0, // Add the number of items when available
-            itemBuilder: (context, index) {
-              // Build your list items here
-              return ListTile(
-                title: Text('List Item $index'),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('lists')
+              .where('UID', isEqualTo: user!.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              final lists = snapshot.data!.docs;
+              return Container(
+                height: 150,
+                child: ListView.builder(
+                  itemCount: lists.length,
+                  itemBuilder: (context, index) {
+                    final list = lists[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddEditListPage(
+                              listId: list.id,
+                              listName: list['listName'],
+                              listItems: list['listItems'].join('\n'),
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        title: Text(list['listName']),
+                      ),
+                    );
+                  },
+                ),
               );
-            },
-          ),
+            }
+          },
         ),
       ],
     );
@@ -59,17 +90,46 @@ class HomePage extends StatelessWidget {
           ),
         ),
         SizedBox(height: 10),
-        Container(
-          height: 150, // Adjust the height as needed
-          child: ListView.builder(
-            itemCount: 0, // Add the number of items when available
-            itemBuilder: (context, index) {
-              // Build your list items here
-              return ListTile(
-                title: Text('Shared List Item $index'),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('lists')
+              .where('sharedID', arrayContains: user!.email)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              final lists = snapshot.data!.docs;
+              return Container(
+                height: 150,
+                child: ListView.builder(
+                  itemCount: lists.length,
+                  itemBuilder: (context, index) {
+                    final list = lists[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddEditListPage(
+                              listId: list.id,
+                              listName: list['listName'],
+                              listItems: list['listItems'].join('\n'),
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        title: Text(list['listName']),
+                      ),
+                    );
+                  },
+                ),
               );
-            },
-          ),
+            }
+          },
         ),
       ],
     );
@@ -89,14 +149,15 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              // Add button pressed, add functionality here.
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddEditListPage()),
+              );
             },
           ),
           IconButton(
             icon: Icon(Icons.search),
-            onPressed: () {
-              // Search button pressed, add functionality here.
-            },
+            onPressed: () {},
           ),
         ],
       ),
