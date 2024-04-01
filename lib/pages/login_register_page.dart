@@ -49,9 +49,18 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // Widget displaying the title of the application
+// Widget displaying the title of the application
   Widget _title() {
-    return const Text('GrocAgree');
+    return Container(
+      alignment: Alignment.center,
+      child: Text(
+        'GrocAgree',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 50.0,
+        ),
+      ),
+    );
   }
 
   // Widget for creating an entry field with a title and controller
@@ -69,19 +78,27 @@ class _LoginPageState extends State<LoginPage> {
 
   // Widget for displaying error messages
   Widget _errorMessage() {
-    return Text(errorMessage == '' ? '' : 'Humm ? $errorMessage');
+    return Text(errorMessage == '' ? '' : '$errorMessage');
   }
 
-  // Widget for creating the submit button (Login or Register)
+// Widget for creating the submit button (Login or Register)
   Widget _submitButton() {
     return ElevatedButton(
       onPressed:
           isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
-      child: Text(isLogin ? 'Login' : 'Register'),
+      child: Text(
+        isLogin ? 'Login' : 'Register',
+        style: TextStyle(color: Colors.white), // Set text color to white
+      ),
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(
+          Color.fromRGBO(24, 135, 239, 1),
+        ),
+      ),
     );
   }
 
-  // Widget for switching between Login and Register modes
+// Widget for switching between Login and Register modes
   Widget _loginOrRegisterButton() {
     return TextButton(
       onPressed: () {
@@ -89,7 +106,10 @@ class _LoginPageState extends State<LoginPage> {
           isLogin = !isLogin;
         });
       },
-      child: Text(isLogin ? 'Register instead' : 'Login instead'),
+      child: Text(
+        isLogin ? 'Register instead' : 'Login instead',
+        style: TextStyle(color: Colors.white), // Set text color to white
+      ),
     );
   }
 

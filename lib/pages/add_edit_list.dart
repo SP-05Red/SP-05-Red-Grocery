@@ -15,7 +15,7 @@ class AddEditListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pre-fill text fields if editing an existing list in Firestore
+    // Pre-fill text fields if editing an existing list
     if (listName != null) _listNameController.text = listName!;
     if (listItems != null) _listItemsController.text = listItems!;
 
@@ -30,35 +30,35 @@ class AddEditListPage extends StatelessWidget {
           children: <Widget>[
             TextField(
               controller: _listNameController,
-              decoration: const InputDecoration(labelText: 'List Name'),
+              decoration: InputDecoration(labelText: 'List Name'),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Expanded(
               child: TextFormField(
                 controller: _listItemsController,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'List Items',
                   border: OutlineInputBorder(),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'Shared with:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             _buildSharedUsersList(context),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _addOtherUsers(context);
+                _s(context);
               },
-              child: const Text('Share with other users'),
+              child: Text('Share List'),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 _saveListToFirestore(context, _sharedIdController.text.trim());
@@ -85,7 +85,7 @@ class AddEditListPage extends StatelessWidget {
         // Filter out empty sharedID fields
         sharedUsers = sharedUsers.where((id) => id.isNotEmpty).toList();
         return sharedUsers.isEmpty
-            ? const Text('No users shared with')
+            ? Text('No users shared with')
             : ListView.builder(
                 shrinkWrap: true,
                 itemCount: sharedUsers.length,
@@ -94,7 +94,7 @@ class AddEditListPage extends StatelessWidget {
                   return ListTile(
                     title: Text(sharedId),
                     trailing: IconButton(
-                      icon: const Icon(Icons.remove,
+                      icon: Icon(Icons.remove,
                           color: Colors.red), // Set icon color to red
                       onPressed: () {
                         _removeSharedIdFromFirestore(context, sharedId);
@@ -121,37 +121,39 @@ class AddEditListPage extends StatelessWidget {
     } catch (error) {
       print('Error removing shared ID: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error removing shared ID')),
+        SnackBar(content: Text('Error removing shared ID')),
       );
     }
   }
 
-  Future<void> _addOtherUsers(BuildContext context) async => showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Additional Options'),
-            content: TextField(
-              controller: _sharedIdController,
-              decoration: const InputDecoration(labelText: 'Enter User Email'),
+  Future<void> _s(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Additional Options'),
+          content: TextField(
+            controller: _sharedIdController,
+            decoration: InputDecoration(labelText: 'Enter User Email'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Exit'),
             ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Exit'),
-              ),
-              TextButton(
-                onPressed: () {
-                  _saveSharedIdToFirestore(context);
-                },
-                child: const Text('Add'),
-              ),
-            ],
-          );
-        },
-      );
+            TextButton(
+              onPressed: () {
+                _saveSharedIdToFirestore(context);
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<void> _saveSharedIdToFirestore(BuildContext context) async {
     try {
@@ -165,16 +167,16 @@ class AddEditListPage extends StatelessWidget {
             'sharedID': FieldValue.arrayUnion([sharedId])
           });
         }
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // Close the dialog
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Enter User Email')),
+          SnackBar(content: Text('Please enter a Shared ID')),
         );
       }
     } catch (error) {
       print('Error saving shared ID: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error saving shared ID')),
+        SnackBar(content: Text('Error saving shared ID')),
       );
     }
   }
@@ -183,8 +185,12 @@ class AddEditListPage extends StatelessWidget {
       BuildContext context, String sharedID) async {
     try {
       String listName = _listNameController.text.trim();
+      // Check if the list name is blank, if so, set it to 'Unnamed List'
+      if (listName.isEmpty) {
+        listName = 'Unnamed List';
+      }
       String listItemsText = _listItemsController.text.trim();
-      if (listName.isNotEmpty && listItemsText.isNotEmpty) {
+      if (listItemsText.isNotEmpty) {
         if (listId != null) {
           // If listId is not null, it means we are editing an existing list
           DocumentSnapshot listSnapshot = await FirebaseFirestore.instance
@@ -229,21 +235,20 @@ class AddEditListPage extends StatelessWidget {
               .collection('lists')
               .doc(newlistId)
               .set(listData);
+          // Navigate back to the previous screen
+          Navigator.pop(context);
         }
-
-        // Navigate back to the previous screen
-        Navigator.pop(context);
       } else {
-        // Show an error message if the list name or items are empty
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('List name and items cannot be empty')));
+        // If listItems are empty, show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('List items cannot be empty')));
       }
     } catch (error) {
       // Handle errors
       print('Error saving list: $error');
       // Show an error message
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Error saving list')));
+          .showSnackBar(SnackBar(content: Text('Error saving list')));
     }
   }
 }

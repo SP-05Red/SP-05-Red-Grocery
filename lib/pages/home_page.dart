@@ -149,10 +149,27 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddEditListPage()),
-              );
+              // Get the current user's UID
+              String uid = user!.uid;
+
+              // Reference to the 'lists' collection in Firestore
+              CollectionReference lists =
+                  FirebaseFirestore.instance.collection('lists');
+
+              // Add a new document with a generated id
+              lists.add({
+                'UID': uid,
+                'listItems': [],
+                'listName': '',
+                'sharedID': [],
+              }).then((value) {
+                // Navigate to AddEditListPage passing the newly generated list's document ID
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddEditListPage(listId: value.id)),
+                );
+              }).catchError((error) => print("Failed to add list: $error"));
             },
           ),
           IconButton(
