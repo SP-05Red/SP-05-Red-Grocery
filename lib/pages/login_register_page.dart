@@ -64,15 +64,15 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Widget for creating an entry field with a title and controller
-  Widget _entryField(
-    String title,
-    TextEditingController controller,
-  ) {
+  Widget _entryField(String title, TextEditingController controller,
+      {bool obscureText = false}) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: title,
       ),
+      obscureText:
+          obscureText, // Set obscureText property to true for password field
     );
   }
 
@@ -129,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             _entryField('email', _controllerEmail),
-            _entryField('password', _controllerPassword),
+            _entryField('password', _controllerPassword, obscureText: true),
             _errorMessage(),
             _submitButton(),
             _loginOrRegisterButton(),
