@@ -13,76 +13,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _deleteMode = false;
-
-  // Current User Object retrieved from the authentication provider
   final User? user = Auth().currentUser;
+  bool deleteMode = false;
 
-  // Asynchronous method to sign out the current user
   Future<void> signOut() async {
     await Auth().signOut();
   }
 
+  void toggleDeleteMode() {
+    setState(() {
+      deleteMode = !deleteMode;
+    });
+  }
+
+  void deleteList(String listId, bool sharedList) {
+    CollectionReference lists = FirebaseFirestore.instance.collection('lists');
+    if (sharedList) {
+      lists.doc(listId).update({
+        'sharedID': FieldValue.arrayRemove([user!.email])
+      });
+    } else {
+      lists.doc(listId).delete();
+    }
+  }
+
   Widget _title() {
     return const Text('GrocAgree');
-  }
-
-  Widget _buildDeleteButton() {
-    return IconButton(
-      icon: Icon(Icons.delete),
-      onPressed: () {
-        setState(() {
-          _deleteMode = !_deleteMode;
-        });
-      },
-    );
-  }
-
-  Widget _listItem(String listId, String listName, List<dynamic> sharedID) {
-    return ListTile(
-      title: Text(listName),
-      trailing: _deleteMode
-          ? IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                if (sharedID.contains(user!.email)) {
-                  // If user's email is in sharedID, remove it
-                  sharedID.remove(user!.email);
-                  FirebaseFirestore.instance
-                      .collection('lists')
-                      .doc(listId)
-                      .update({'sharedID': sharedID}).then((_) {
-                    print('User removed from shared list successfully');
-                  }).catchError((error) {
-                    print('Failed to remove user from shared list: $error');
-                  });
-                } else {
-                  // Otherwise, delete the list
-                  FirebaseFirestore.instance
-                      .collection('lists')
-                      .doc(listId)
-                      .delete()
-                      .then((_) {
-                    print('List deleted successfully');
-                  }).catchError((error) {
-                    print('Failed to delete list: $error');
-                  });
-                }
-              },
-            )
-          : null,
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AddEditListPage(
-              listId: listId,
-              listName: listName,
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Widget _myLists() {
@@ -115,11 +71,35 @@ class _HomePageState extends State<HomePage> {
                   itemCount: lists.length,
                   itemBuilder: (context, index) {
                     final list = lists[index];
-                    return Column(
-                      children: [
-                        _listItem(list.id, list['listName'], list['sharedID']),
-                        _deleteMode ? _buildDeleteButton() : Container(),
-                      ],
+                    return GestureDetector(
+                      onTap: () {
+                        if (deleteMode) {
+                          deleteList(list.id, false);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddEditListPage(
+                                listId: list.id,
+                                listName: list['listName'],
+                                listItems: list['listItems'].join('\n'),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: ListTile(
+                        title: Text(list['listName']),
+                        trailing: deleteMode
+                            ? IconButton(
+                                icon: Icon(Icons.delete),
+                                color: Colors.white,
+                                onPressed: () {
+                                  deleteList(list.id, false);
+                                },
+                              )
+                            : null,
+                      ),
                     );
                   },
                 ),
@@ -161,11 +141,35 @@ class _HomePageState extends State<HomePage> {
                   itemCount: lists.length,
                   itemBuilder: (context, index) {
                     final list = lists[index];
-                    return Column(
-                      children: [
-                        _listItem(list.id, list['listName'], list['sharedID']),
-                        _deleteMode ? _buildDeleteButton() : Container(),
-                      ],
+                    return GestureDetector(
+                      onTap: () {
+                        if (deleteMode) {
+                          deleteList(list.id, true);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddEditListPage(
+                                listId: list.id,
+                                listName: list['listName'],
+                                listItems: list['listItems'].join('\n'),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: ListTile(
+                        title: Text(list['listName']),
+                        trailing: deleteMode
+                            ? IconButton(
+                                icon: Icon(Icons.delete),
+                                color: Colors.white,
+                                onPressed: () {
+                                  deleteList(list.id, true);
+                                },
+                              )
+                            : null,
+                      ),
                     );
                   },
                 ),
@@ -183,15 +187,20 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: _title(),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(_deleteMode ? Icons.close : Icons.delete),
-            onPressed: () {
-              setState(() {
-                _deleteMode = !_deleteMode;
-              });
-            },
+          Padding(
+            padding: EdgeInsets.all(8.0), // Add padding here
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color.fromRGBO(24, 135, 239, 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                icon: Icon(deleteMode ? Icons.cancel : Icons.delete),
+                color: Colors.white,
+                onPressed: toggleDeleteMode,
+              ),
+            ),
           ),
-          SizedBox(width: 10), // Add some space between the buttons
           SizedBox(
             height: 40, // Set the desired height
             child: Padding(
@@ -217,27 +226,21 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.only(right: 8.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Color.fromRGBO(24, 135, 239, 1),
+                  color: Color.fromRGBO(24, 135, 239, 1), // Change color here
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
                   icon: Icon(Icons.add, color: Colors.white),
                   onPressed: () {
-                    // Get the current user's UID
                     String uid = user!.uid;
-
-                    // Reference to the 'lists' collection in Firestore
                     CollectionReference lists =
                         FirebaseFirestore.instance.collection('lists');
-
-                    // Add a new document with a generated id
                     lists.add({
                       'UID': uid,
                       'listItems': [],
                       'listName': '',
                       'sharedID': [],
                     }).then((value) {
-                      // Navigate to AddEditListPage passing the newly generated list's document ID
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -257,7 +260,7 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.only(right: 8.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Color.fromRGBO(24, 135, 239, 1),
+                  color: Color.fromRGBO(24, 135, 239, 1), // Change color here
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
