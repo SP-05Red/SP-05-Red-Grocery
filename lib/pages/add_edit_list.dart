@@ -22,6 +22,26 @@ class AddEditListPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(listId != null ? 'Edit List' : 'Add List'),
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color.fromRGBO(24, 135, 239, 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.all(8),
+              child: Center(
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -94,8 +114,7 @@ class AddEditListPage extends StatelessWidget {
                   return ListTile(
                     title: Text(sharedId),
                     trailing: IconButton(
-                      icon: Icon(Icons.remove,
-                          color: Colors.red), // Set icon color to red
+                      icon: Icon(Icons.remove, color: Colors.red),
                       onPressed: () {
                         _removeSharedIdFromFirestore(context, sharedId);
                       },
