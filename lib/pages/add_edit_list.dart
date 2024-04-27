@@ -43,18 +43,18 @@ class AddEditListPage extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextField(
-              controller: _listNameController,
-              decoration: InputDecoration(labelText: 'List Name'),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: TextFormField(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextField(
+                controller: _listNameController,
+                decoration: InputDecoration(labelText: 'List Name'),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
                 controller: _listItemsController,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
@@ -63,29 +63,30 @@ class AddEditListPage extends StatelessWidget {
                   border: OutlineInputBorder(),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Shared with:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            _buildSharedUsersList(context),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _s(context);
-              },
-              child: Text('Share List'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _saveListToFirestore(context, _sharedIdController.text.trim());
-              },
-              child: Text(listId != null ? 'Update List' : 'Save List'),
-            ),
-          ],
+              SizedBox(height: 20),
+              Text(
+                'Shared with:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              _buildSharedUsersList(context),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _s(context);
+                },
+                child: Text('Share List'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _saveListToFirestore(
+                      context, _sharedIdController.text.trim());
+                },
+                child: Text(listId != null ? 'Update List' : 'Save List'),
+              ),
+            ],
+          ),
         ),
       ),
     );
